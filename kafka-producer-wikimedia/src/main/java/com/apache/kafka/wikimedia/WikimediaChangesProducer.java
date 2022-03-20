@@ -22,7 +22,11 @@ public class WikimediaChangesProducer {
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-
+        //Set the high throughput producer properties
+        properties.setProperty(ProducerConfig.LINGER_MS_CONFIG,"20");
+        properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG,Integer.toString(32*1024));
+        properties.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG,"snappy");
+        
         //Set safe producer configurations for kafka version <=2.8
        /*
         properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,"true");
@@ -43,5 +47,6 @@ public class WikimediaChangesProducer {
 
         //we produce for 10 minutes and then block the program until then
         TimeUnit.MINUTES.sleep(10);
+
     }
 }
