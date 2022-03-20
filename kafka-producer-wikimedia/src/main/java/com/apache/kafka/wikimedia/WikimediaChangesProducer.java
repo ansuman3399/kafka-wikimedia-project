@@ -26,7 +26,7 @@ public class WikimediaChangesProducer {
         properties.setProperty(ProducerConfig.LINGER_MS_CONFIG,"20");
         properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG,Integer.toString(32*1024));
         properties.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG,"snappy");
-        
+
         //Set safe producer configurations for kafka version <=2.8
        /*
         properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,"true");

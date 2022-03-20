@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+kafka-consumer-opensearch/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+*.bin
+*.lock
+kafka-consumer-opensearch/.gradle/7.1/dependencies-accessors/gc.properties
+kafka-consumer-opensearch/.gradle/7.1/gc.properties
+kafka-consumer-opensearch/.gradle/buildOutputCleanup/cache.properties
+kafka-consumer-opensearch/.gradle/vcs-1/gc.properties
