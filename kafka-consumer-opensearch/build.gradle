@@ -24,6 +24,10 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
     implementation 'com.google.code.gson:gson:2.9.0'
+
+    // https://mvnrepository.com/artifact/com.twitter/hbc-core
+    implementation 'com.twitter:hbc-core:2.2.0'
+
 }
 
 test {

@@ -1,5 +1,7 @@
 package com.apache.kafka;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -11,6 +13,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.opensearch.action.bulk.BulkRequest;
+import org.opensearch.action.bulk.BulkResponse;
 import org.opensearch.action.index.IndexRequest;
 import org.opensearch.action.index.IndexResponse;
 import org.opensearch.client.RequestOptions;
@@ -47,23 +51,56 @@ public class OpenSearchConsumer {
         }
         //Subscribing to the topic
         kafkaConsumer.subscribe(Collections.singleton("wikimedia.recentchange"));
+
         while (true) {
             ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(3000));
-            log.info("Received:"+ records.count());
+            log.info("Received:" + records.count());
+            BulkRequest bulkRequest = new BulkRequest();
             for (ConsumerRecord<String, String> record : records) {
-                //Send the record into opensearch
-                IndexRequest indexRequest = new IndexRequest(indexName)
-                        .source(record.value(), XContentType.JSON);
+                //use an ID to attach to a record to avoid duplicate processing i.e,making the consumer idempotent
+                //String id = record.topic() + "_" + record.partition() + "_" + record.offset();
+                //or you can use the ID if its present in the message - might not be present
+                String id = extractId(record.value());
+                try {
+                    //Send the record into opensearch
+                    IndexRequest indexRequest = new IndexRequest(indexName)
+                            .source(record.value(), XContentType.JSON)
+                            .id(id);
 
-                IndexResponse response = opensearchClient.index(indexRequest, RequestOptions.DEFAULT);
+//                    IndexResponse response = opensearchClient.index(indexRequest, RequestOptions.DEFAULT);
+                    bulkRequest.add(indexRequest);
+//                    log.info("Inserted 1 document into opensearch with ID:" + response.getId());
+                } catch (Exception e) {
 
-                log.info("Inserted 1 document into opensearch with ID:"+response.getId());
+                }
+            }
+            if(bulkRequest.numberOfActions()>0){
+                BulkResponse bulkResponse = opensearchClient.bulk(bulkRequest,RequestOptions.DEFAULT);
+                log.info("Inserted:"+bulkResponse.getItems().length + " record(s)");
+
+                try{
+                    Thread.sleep(1000);
+                }catch (InterruptedException e){
+
+                }
+
+                kafkaConsumer.commitSync();
+                log.info("Commited the offsets");
             }
         }
         //main code logic
 
 
         //
+    }
+
+    public static String extractId(String value) {
+        return JsonParser.parseString(value)
+                .getAsJsonObject()
+                .get("meta")
+                .getAsJsonObject()
+                .get("id")
+                .getAsString();
     }
 
     public static KafkaConsumer<String, String> createKafkaConsumer() {
