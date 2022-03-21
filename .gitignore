@@ -38,3 +38,4 @@ kafka-consumer-opensearch/.gradle/7.1/dependencies-accessors/gc.properties
 kafka-consumer-opensearch/.gradle/7.1/gc.properties
 kafka-consumer-opensearch/.gradle/buildOutputCleanup/cache.properties
 kafka-consumer-opensearch/.gradle/vcs-1/gc.properties
+*.class
